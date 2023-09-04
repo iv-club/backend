@@ -7,6 +7,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
@@ -17,19 +18,24 @@ const styles = theme => ({
   },
   table:{
     minWidth: 1080
+  },
+  progress: {
+    margin: theme.spacing.unit * 2 //위 쪽으로 2만큼 마진
   }
 })
 
 class App extends Component { // class 컴포넌트
 
   state = { // 변경될수 있는 변수 그러나 props는 변경될 수 없는 변수를 의미 
-    customers: ""
+    customers: "",
+    completed : 0
   }
 
   componentDidMount() { // API 서버에서 데이터를 받아올 수 있는 작업을 처리
-    this.callApi()
-    .then(res => this.setState({customers: res}))
-    .catch(err => console.log(err));
+    this.timer = setInterval(this.progress, 20); // 0.02초마다 progress 함수가 실행
+    // this.callApi()
+    // .then(res => this.setState({customers: res}))
+    // .catch(err => console.log(err));
   }
 
   callApi = async () => { // 비동기적으로 수행
@@ -38,6 +44,10 @@ class App extends Component { // class 컴포넌트
     return body;
   }
 
+  progress = () => {
+    const { completed } = this.state;
+    this.setState( { completed : completed >= 100 ? 0 : completed + 1});
+  }
   render(){
     const {classes} = this.props;
     return (
@@ -60,7 +70,13 @@ class App extends Component { // class 컴포넌트
                   birthday={c.birthday}
                   gender={c.gender}
                   job={c.job}/>);
-                }) : ""}
+                }) : 
+                <TableRow>
+                  <TableCell colSpan="6" align="center">
+                    <CircularProgress className={classes.progress} variant="determinate" value={this.state.completed} />
+                  </TableCell>
+                </TableRow>
+                }
             </TableBody>
           </Table>
         </Paper>
